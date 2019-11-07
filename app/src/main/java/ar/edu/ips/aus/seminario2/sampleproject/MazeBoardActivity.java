@@ -38,6 +38,7 @@ public class MazeBoardActivity extends AppCompatActivity
 
     public static final String EXTRA_SERVER_NAME = "SERVER_NAME";
     public static final String EXTRA_IS_SERVER = "IS_SERVER";
+    public static final String EXTRA_OPTION = "OPTION";
     private static final String TAG = MazeBoardActivity.class.getSimpleName();
     private static final int MAX_DEVICES = 3;
 
@@ -72,6 +73,7 @@ public class MazeBoardActivity extends AppCompatActivity
 
         GameApp.getInstance().setServerName(getIntent().getStringExtra(this.EXTRA_SERVER_NAME));
         GameApp.getInstance().setGameServer(getIntent().getBooleanExtra(this.EXTRA_IS_SERVER, false));
+        String option = getIntent().getStringExtra(this.EXTRA_OPTION);
         if (GameApp.getInstance().isGameServer()){
             WroupService server = WroupService.getInstance(this);
             server.setDataReceivedListener(this);
@@ -86,7 +88,7 @@ public class MazeBoardActivity extends AppCompatActivity
             GameApp.getInstance().setClient(client);
         }
 
-        MazeBoard board = MazeBoard.from("asdasd");
+        MazeBoard board = MazeBoard.from(option);
         GameApp.getInstance().setMazeBoard(board);
         setupMazeBoard(board);
     }
