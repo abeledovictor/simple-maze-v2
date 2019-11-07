@@ -27,6 +27,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,9 +89,11 @@ public class MazeBoardActivity extends AppCompatActivity
             GameApp.getInstance().setClient(client);
         }
 
-        MazeBoard board = MazeBoard.from("asdasd");
-        GameApp.getInstance().setMazeBoard(board);
-        setupMazeBoard(board);
+        if(GameApp.getInstance().isGameServer()) {
+            MazeBoard board = MazeBoard.from("asdasd");
+            GameApp.getInstance().setMazeBoard(board);
+            setupMazeBoard(board);
+        }
     }
 
     private void setupMazeBoard(MazeBoard board) {
@@ -179,8 +184,19 @@ public class MazeBoardActivity extends AppCompatActivity
 
     @Override
     public void onClientConnected(final WroupDevice wroupDevice) {
-        if (GameApp.getInstance().isGameServer())
+        // if we are server send maze board
+        if (GameApp.getInstance().isGameServer()) {
             addToDeviceList(wroupDevice);
+            WroupService server = GameApp.getInstance().getServer();
+            MessageWrapper message = new MessageWrapper();
+            Gson json = new Gson();
+            Message<MazeBoard> data = new Message<MazeBoard>(Message.MessageType.GAME_DATA, GameApp.getInstance().getMazeBoard());
+            String msg = json.toJson(data);
+            message.setMessage(msg);
+            message.setMessageType(MessageWrapper.MessageType.NORMAL);
+            server.sendMessage(wroupDevice, message);
+        }
+
 
         runOnUiThread(new Runnable() {
             @Override
@@ -217,6 +233,8 @@ public class MazeBoardActivity extends AppCompatActivity
 
     @Override
     public void onDataReceived(MessageWrapper messageWrapper) {
+        Gson gson = new Gson();
+
         if (!GameApp.getInstance().isGameServer()) {
             // client may receive different kind of messages from server
             JsonObject object = JsonParser.parseString(messageWrapper.getMessage()).getAsJsonObject();
@@ -226,6 +244,18 @@ public class MazeBoardActivity extends AppCompatActivity
                     mazeView.updatePlayerData(messageWrapper.getMessage());
                     break;
                 case GAME_DATA:
+                    String message = messageWrapper.getMessage();
+                    Message<MazeBoard> newMaze = gson.fromJson(message,
+                            new TypeToken<Message<MazeBoard>>(){}.getType());
+                    final MazeBoard board = newMaze.getPayload();
+                    Log.d("CLIENTE: GAME_DATA maze", gson.toJson(board));
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Stuff that updates the UI
+                            setupMazeBoard(board);
+                        }
+                    });
                     break;
                 case GAME_STATUS:
                     mazeView.updateStatus(messageWrapper.getMessage());
@@ -239,4 +269,7 @@ public class MazeBoardActivity extends AppCompatActivity
         }
 
     }
+
+
+
 }
