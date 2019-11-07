@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.abemart.wroup.client.WroupClient;
@@ -29,6 +30,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements GroupCreationDialog.GroupCreationAcceptButtonListener {
 
+    private String txt_button = null;
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -98,14 +100,14 @@ public class MainActivity extends AppCompatActivity implements GroupCreationDial
 
     @Override
     public void onAcceptButtonListener(final String groupName) {
-        if (!groupName.isEmpty()) {
+        if (!groupName.isEmpty() && txt_button != null) {
             wroupService = WroupService.getInstance(getApplicationContext());
             wroupService.registerService(groupName, new ServiceRegisteredListener() {
 
                 @Override
                 public void onSuccessServiceRegistered() {
                     Log.i(TAG, "Group created. Launching GroupChatActivity...");
-                    startGameActivity(groupName, true);
+                    startGameActivity(groupName, true,txt_button);
                     groupCreationDialog.dismiss();
                 }
 
@@ -175,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements GroupCreationDial
                     @Override
                     public void onServiceConnected(WroupDevice serviceDevice) {
                         progressDialog.dismiss();
-                        startGameActivity(serviceSelected.getTxtRecordMap().get(WroupService.SERVICE_GROUP_NAME), false);
+                        startGameActivity(serviceSelected.getTxtRecordMap().get(WroupService.SERVICE_GROUP_NAME), false,null);
                     }
                 });
             }
@@ -186,10 +188,18 @@ public class MainActivity extends AppCompatActivity implements GroupCreationDial
     }
 
 
-    private void startGameActivity(String groupName, boolean isGroupOwner) {
+    private void startGameActivity(String groupName, boolean isGroupOwner, String option) {
         Intent intent = new Intent(getApplicationContext(), MazeBoardActivity.class);
         intent.putExtra(MazeBoardActivity.EXTRA_SERVER_NAME, groupName);
         intent.putExtra(MazeBoardActivity.EXTRA_IS_SERVER, isGroupOwner);
+        intent.putExtra(MazeBoardActivity.EXTRA_OPTION, option);
         startActivity(intent);
     }
+
+    public void getTextButton(View view) {
+        Button but = (Button) view;
+        txt_button = but.getText().toString();
+        Toast.makeText(getApplicationContext(),"You chose: " + txt_button, Toast.LENGTH_SHORT).show();
+    }
+
 }

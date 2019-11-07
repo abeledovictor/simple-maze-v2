@@ -9,6 +9,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 
 public class GroupCreationDialog extends DialogFragment {
@@ -20,14 +21,17 @@ public class GroupCreationDialog extends DialogFragment {
 
     private GroupCreationAcceptButtonListener listener;
 
+    View dialogContent;
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
         LayoutInflater layoutInflater = getActivity().getLayoutInflater();
-        View dialogContent = layoutInflater.inflate(R.layout.creation_group_dialog, null);
+        dialogContent = layoutInflater.inflate(R.layout.creation_group_dialog, null);
 
         final EditText tfGroupName = (EditText) dialogContent.findViewById(R.id.editTextGroupName);
+
 
         builder.setView(dialogContent);
         builder.setPositiveButton(getResources().getString(R.string.btn_accept), new DialogInterface.OnClickListener() {
@@ -53,5 +57,4 @@ public class GroupCreationDialog extends DialogFragment {
     public void addGroupCreationAcceptListener(GroupCreationAcceptButtonListener listener) {
         this.listener = listener;
     }
-
 }
