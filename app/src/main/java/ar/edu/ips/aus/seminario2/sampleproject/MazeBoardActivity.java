@@ -251,6 +251,7 @@ public class MazeBoardActivity extends AppCompatActivity
                             new TypeToken<Message<MazeBoard>>(){}.getType());
                     final MazeBoard board = newMaze.getPayload();
                     Log.d("CLIENTE: GAME_DATA maze", gson.toJson(board));
+                    GameApp.getInstance().setMazeBoard(board);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
