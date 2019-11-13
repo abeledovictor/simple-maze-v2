@@ -59,7 +59,8 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
 
         String id = Settings.Secure.getString(getContext().getContentResolver(),
                 Settings.Secure.ANDROID_ID);
-        player = new Player(id,0.5,0.5);
+
+        player = new Player(id);
         players.put(id, player);
 
         playerSprites = new PlayerSprite(getResources());
@@ -73,10 +74,41 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         return player;
     }
 
+    private int getRandomStartPosition() {
+        int max = 3;
+        int min = 0;
+        Random rand = new Random();
+        int randomNum = rand.nextInt((max - min) + 1) + min;
+
+        return randomNum;
+    }
+
+    private void setInitialPlayerPosition() {
+        double x = 0;
+        double y = 0;
+        int randomPos = this.getRandomStartPosition();
+        if(randomPos == 0) {
+            x = GameApp.getInstance().getMazeBoard().getHorizontalTileCount() - 0.5;
+            y = GameApp.getInstance().getMazeBoard().getVerticalTileCount() - 0.5;
+        } else if(randomPos == 1) {
+            x = 0.5;
+            y = GameApp.getInstance().getMazeBoard().getVerticalTileCount() - 0.5;
+        } else if(randomPos == 2) {
+            x = GameApp.getInstance().getMazeBoard().getHorizontalTileCount() - 0.5;
+            y = 0.5;
+        } else if(randomPos == 3) {
+            x = 0.5;
+            y = 0.5;
+        }
+        this.player.setY(y);
+        this.player.setX(x);
+    }
+
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         thread.setRunning(true);
         thread.start();
+
     }
 
     @Override
@@ -143,6 +175,9 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
             MazeBoard board = GameApp.getInstance().getMazeBoard();
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             if (board != null) {
+                if(!this.player.isInitialized()) {
+                    this.setInitialPlayerPosition();
+                }
                 for (Player p : this.players.values()) {
                     Rect srcRect = playerSprites.getSourceRectangle(this, board, p, p.getOrder());
                     Rect dstRect = playerSprites.getDestinationRectangle(this, board, p);

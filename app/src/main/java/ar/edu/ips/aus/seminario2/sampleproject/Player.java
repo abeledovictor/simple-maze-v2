@@ -18,10 +18,20 @@ public class Player {
     private final static double VEL_FACTOR = 500000000;
     private int order;
 
+    public Player(String id) {
+        this.ID = id;
+        this.x = -1;
+        this.y = -1;
+    }
+
     public Player(String id, double x, double y) {
         this.ID = id;
         this.x = x;
         this.y = y;
+    }
+
+    public boolean isInitialized() {
+        return !(x == -1 && y == -1);
     }
 
     public String getID() {
@@ -69,43 +79,45 @@ public class Player {
         MazeBoard.Direction dir = NONE;
         dir = getDirection();
 
-        switch(dir) {
-            case NORTH:
-                if ((getY() > (double)pieceYPos + 0.5d) ||
-                        board.getPiece(pieceXPos, pieceYPos).isOpen(NORTH)) {
-                    this.computeMovement(delta);
-                    moved = true;
-                } else {
-                    stopOnY((double)pieceYPos + 0.5d );
-                }
-                break;
-            case SOUTH:
-                if ((getY() < (double)pieceYPos + 0.5d) ||
-                        board.getPiece(pieceXPos, pieceYPos).isOpen(MazeBoard.Direction.SOUTH)) {
-                    this.computeMovement(delta);
-                    moved = true;
-                } else {
-                    stopOnY((double)pieceYPos + 0.5d);
-                }
-                break;
-            case WEST:
-                if ((getX() > (double)pieceXPos + 0.5d) ||
-                        board.getPiece(pieceXPos, pieceYPos).isOpen(WEST)) {
-                    this.computeMovement(delta);
-                    moved = true;
-                } else {
-                    stopOnX((double)pieceXPos + 0.5d);
-                }
-                break;
-            case EAST:
-                if ( (getX() < (double)pieceXPos + 0.5d) ||
-                        board.getPiece(pieceXPos, pieceYPos).isOpen(EAST)) {
-                    this.computeMovement(delta);
-                    moved = true;
-                } else {
-                    stopOnX((double)pieceXPos + 0.5d);
-                }
-                break;
+        if(this.isInitialized()) {
+            switch (dir) {
+                case NORTH:
+                    if ((getY() > (double) pieceYPos + 0.5d) ||
+                            board.getPiece(pieceXPos, pieceYPos).isOpen(NORTH)) {
+                        this.computeMovement(delta);
+                        moved = true;
+                    } else {
+                        stopOnY((double) pieceYPos + 0.5d);
+                    }
+                    break;
+                case SOUTH:
+                    if ((getY() < (double) pieceYPos + 0.5d) ||
+                            board.getPiece(pieceXPos, pieceYPos).isOpen(MazeBoard.Direction.SOUTH)) {
+                        this.computeMovement(delta);
+                        moved = true;
+                    } else {
+                        stopOnY((double) pieceYPos + 0.5d);
+                    }
+                    break;
+                case WEST:
+                    if ((getX() > (double) pieceXPos + 0.5d) ||
+                            board.getPiece(pieceXPos, pieceYPos).isOpen(WEST)) {
+                        this.computeMovement(delta);
+                        moved = true;
+                    } else {
+                        stopOnX((double) pieceXPos + 0.5d);
+                    }
+                    break;
+                case EAST:
+                    if ((getX() < (double) pieceXPos + 0.5d) ||
+                            board.getPiece(pieceXPos, pieceYPos).isOpen(EAST)) {
+                        this.computeMovement(delta);
+                        moved = true;
+                    } else {
+                        stopOnX((double) pieceXPos + 0.5d);
+                    }
+                    break;
+            }
         }
         return moved;
     }
