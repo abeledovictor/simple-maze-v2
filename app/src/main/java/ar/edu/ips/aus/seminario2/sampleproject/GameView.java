@@ -1,5 +1,6 @@
 package ar.edu.ips.aus.seminario2.sampleproject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -7,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -38,6 +40,10 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     private int moves = 0;
     private static final int SERVER_UPDATE_RATIO = 3;
     private static final int CLIENT_UPDATE_RATIO = 2;
+
+    private boolean gameOver = false;
+
+    final MediaPlayer mp = MediaPlayer.create(this.getContext(),R.raw.winning);
 
     public GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -134,12 +140,24 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     public void update(long delta) {
         if (this.updating) {
             MazeBoard board = GameApp.getInstance().getMazeBoard();
+
             // update only actual player
             player.move(board, delta);
             this.moves++;
 
+            int x = (int)player.getX();
+            int y = (int)player.getY();
+            BoardPiece piezaActual = board.getPiece(x,y);
+
+            if(piezaActual.getExit()) {
+                player.setIsWinner(true);
+            }
+
             // if we are server send all players data
             if (GameApp.getInstance().isGameServer()) {
+
+                if(player.getIsWinner()) this.endGame();
+
                 if (this.moves % SERVER_UPDATE_RATIO == 0) {
                     WroupService server = GameApp.getInstance().getServer();
                     MessageWrapper message = new MessageWrapper();
@@ -152,6 +170,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                     server.sendMessageToAllClients(message);
                 }
             } else {
+
                 // if we are client send player data
                 if (this.moves % CLIENT_UPDATE_RATIO == 0) {
                     WroupClient client = GameApp.getInstance().getClient();
@@ -166,6 +185,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 }
             }
         }
+    }
+
+    public void endGame() {
+        //quit to main menu
+        //Ultimo ganador del juego
+
+        toggleStatus();
+        //updateStatus();
+        //((Activity) this.getContext()).finish();
+
     }
 
     @Override
@@ -193,6 +222,11 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
         Message<Player[]> playerData = gson.fromJson(message,
                 new TypeToken<Message<Player[]>>(){}.getType());
         for (Player pd:playerData.getPayload()) {
+
+                if(pd.getIsWinner()){
+                    this.endGame();
+                }
+
             if (!player.getID().equals(pd.getID())) {
                 Player p = players.get(pd.getID());
                 if (p == null) {

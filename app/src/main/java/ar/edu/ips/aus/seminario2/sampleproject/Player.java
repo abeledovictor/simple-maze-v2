@@ -18,6 +18,8 @@ public class Player {
     private final static double VEL_FACTOR = 500000000;
     private int order;
 
+    private boolean isWinner = false;
+
     public Player(String id) {
         this.ID = id;
         this.x = -1;
@@ -182,4 +184,8 @@ public class Player {
     public int getOrder() {
         return this.order;
     }
+
+    public void setIsWinner(boolean winner) { this.isWinner = winner; }
+
+    public boolean getIsWinner() { return this.isWinner; }
 }

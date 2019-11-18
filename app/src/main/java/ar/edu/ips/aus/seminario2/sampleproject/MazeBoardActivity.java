@@ -140,29 +140,33 @@ public class MazeBoardActivity extends AppCompatActivity
    }
 
     private int lookupResource(BoardPiece piece) {
-        int iconIndex = 0b1000 * (piece.isOpen(MazeBoard.Direction.WEST)? 1:0) +
-                0b0100 * (piece.isOpen(MazeBoard.Direction.NORTH)? 1:0) +
-                0b0010 * (piece.isOpen(MazeBoard.Direction.EAST)? 1:0) +
-                0b0001 * (piece.isOpen(MazeBoard.Direction.SOUTH)? 1:0);
+        if(piece.getExit()){
+            return R.drawable.m5b;
+        }else{
+            int iconIndex = 0b1000 * (piece.isOpen(MazeBoard.Direction.WEST)? 1:0) +
+                    0b0100 * (piece.isOpen(MazeBoard.Direction.NORTH)? 1:0) +
+                    0b0010 * (piece.isOpen(MazeBoard.Direction.EAST)? 1:0) +
+                    0b0001 * (piece.isOpen(MazeBoard.Direction.SOUTH)? 1:0);
 
-        int[] iconLookupTable = { 0,
-                R.drawable.m1b,
-                R.drawable.m1r,
-                R.drawable.m2rb,
-                R.drawable.m1t,
-                R.drawable.m2v,
-                R.drawable.m2tr,
-                R.drawable.m3l,
-                R.drawable.m1l,
-                R.drawable.m2bl,
-                R.drawable.m2h,
-                R.drawable.m3t,
-                R.drawable.m2lt,
-                R.drawable.m3r,
-                R.drawable.m3b,
-                R.drawable.m4};
+            int[] iconLookupTable = { 0,
+                    R.drawable.m1b,
+                    R.drawable.m1r,
+                    R.drawable.m2rb,
+                    R.drawable.m1t,
+                    R.drawable.m2v,
+                    R.drawable.m2tr,
+                    R.drawable.m3l,
+                    R.drawable.m1l,
+                    R.drawable.m2bl,
+                    R.drawable.m2h,
+                    R.drawable.m3t,
+                    R.drawable.m2lt,
+                    R.drawable.m3r,
+                    R.drawable.m3b,
+                    R.drawable.m4};
 
-        return iconLookupTable[iconIndex];
+            return iconLookupTable[iconIndex];
+        }
     }
 
     @Override
@@ -189,6 +193,13 @@ public class MazeBoardActivity extends AppCompatActivity
         // if we are server send maze board
         if (GameApp.getInstance().isGameServer()) {
             addToDeviceList(wroupDevice);
+
+            try {
+                Thread.sleep(1000L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
             WroupService server = GameApp.getInstance().getServer();
             MessageWrapper message = new MessageWrapper();
             Gson json = new Gson();
@@ -196,7 +207,7 @@ public class MazeBoardActivity extends AppCompatActivity
             String msg = json.toJson(data);
             message.setMessage(msg);
             message.setMessageType(MessageWrapper.MessageType.NORMAL);
-            server.sendMessage(wroupDevice, message);
+            server.sendMessage(wroupDevice, message); ///!!!!
         }
 
 
@@ -252,6 +263,9 @@ public class MazeBoardActivity extends AppCompatActivity
                     final MazeBoard board = newMaze.getPayload();
                     Log.d("CLIENTE: GAME_DATA maze", gson.toJson(board));
                     GameApp.getInstance().setMazeBoard(board);
+                    try{
+                        Thread.sleep(1000L);
+                    }catch(Exception e){}
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
